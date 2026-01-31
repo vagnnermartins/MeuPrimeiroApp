@@ -1,7 +1,6 @@
 package com.example.meuprimeiroapp
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.meuprimeiroapp.adapter.ItemAdapter
@@ -34,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupView() {
         binding.swipeRefreshLayout.setOnRefreshListener {
-
+            fetchItems()
         }
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.addCta.setOnClickListener {
@@ -59,6 +58,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleOnSuccess(items: List<Item>) {
-        binding.recyclerView.adapter = ItemAdapter(items)
+        binding.recyclerView.adapter = ItemAdapter(items) { item ->
+//            val intent = ItemDetailActivity.newIntent(this, item)
+//            startActivity(intent)
+        }
     }
 }

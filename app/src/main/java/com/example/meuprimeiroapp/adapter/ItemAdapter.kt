@@ -11,7 +11,8 @@ import com.example.meuprimeiroapp.model.Item
 import com.example.meuprimeiroapp.ui.loadUrl
 
 class ItemAdapter(
-    private val items: List<Item>
+    private val items: List<Item>,
+    private val onItemClick: (Item) -> Unit,
 ) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView = view.findViewById<ImageView>(R.id.image)
@@ -35,6 +36,9 @@ class ItemAdapter(
         holder.ageTextView.text = holder.itemView.context.getString(R.string.item_age, item.value.age)
         holder.professionTextView.text = item.value.profession
         holder.imageView.loadUrl(item.value.imageUrl)
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
+        }
     }
 
     override fun getItemCount(): Int = items.size
