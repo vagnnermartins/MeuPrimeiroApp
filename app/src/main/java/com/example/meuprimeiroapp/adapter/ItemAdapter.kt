@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meuprimeiroapp.R
 import com.example.meuprimeiroapp.model.Item
+import com.example.meuprimeiroapp.ui.loadUrl
 
 class ItemAdapter(
     private val items: List<Item>
@@ -28,11 +29,12 @@ class ItemAdapter(
         return ItemViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ItemAdapter.ItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = items[position]
         holder.fullNameTextView.text = item.value.fullName
         holder.ageTextView.text = holder.itemView.context.getString(R.string.item_age, item.value.age)
         holder.professionTextView.text = item.value.profession
+        holder.imageView.loadUrl(item.value.imageUrl)
     }
 
     override fun getItemCount(): Int = items.size
