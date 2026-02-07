@@ -58,6 +58,9 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.deleteCTA.setOnClickListener {
             deleteItem()
         }
+        binding.editCTA.setOnClickListener {
+            editItem()
+        }
     }
 
     private fun loadItem() {
@@ -75,7 +78,7 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
                     is Result.Error -> {
                         Toast.makeText(
                             this@ItemDetailActivity,
-                            "Erro ao buscar o getItem(itemId)",
+                            R.string.error_fetch_item,
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -126,8 +129,40 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
                     is Result.Error -> {
                         Toast.makeText(
                             this@ItemDetailActivity,
-                            "Erro ao deletar o item",
+                            R.string.error_delete,
                             Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun editItem() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = safeApiCall {
+                RetrofitClient.apiService.updateItem(
+                    item.id,
+                    item.value.copy(profession = binding.profession.text.toString())
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is Result.Success -> {
+                        Toast.makeText(
+                            this@ItemDetailActivity,
+                            R.string.success_update,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        finish()
+                    }
+
+                    is Result.Error -> {
+                        Toast.makeText(
+                            this@ItemDetailActivity,
+                            R.string.error_update,
+                            Toast.LENGTH_LONG
                         ).show()
                     }
                 }
@@ -138,7 +173,7 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun handleSuccessDelete() {
         Toast.makeText(
             this,
-            "Item deletado com sucesso",
+            R.string.success_delete,
             Toast.LENGTH_LONG
         ).show()
         finish()
