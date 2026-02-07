@@ -7,8 +7,17 @@ import android.graphics.Paint
 import android.graphics.Shader
 import com.squareup.picasso.Transformation
 
+/**
+ * A Picasso [Transformation] that crops an image into a circle.
+ */
 class CircleTransform : Transformation {
 
+    /**
+     * Transforms the source bitmap into a circular bitmap.
+     *
+     * @param source The source bitmap.
+     * @return The transformed circular bitmap.
+     */
     override fun transform(source: Bitmap): Bitmap {
         val size = source.width.coerceAtMost(source.height)
 
@@ -35,6 +44,11 @@ class CircleTransform : Transformation {
         return bitmap
     }
 
+    /**
+     * Returns a unique key for the transformation.
+     *
+     * @return The unique key.
+     */
     override fun key(): String {
         return "circle"
     }

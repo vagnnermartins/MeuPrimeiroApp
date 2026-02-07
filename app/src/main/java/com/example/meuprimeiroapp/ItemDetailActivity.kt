@@ -48,6 +48,9 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Sets up the view, including the toolbar.
+     */
     private fun setupView() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -63,6 +66,9 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Loads the item data from the API based on the provided item ID.
+     */
     private fun loadItem() {
         val itemId = intent.getStringExtra(ARG_ID) ?: ""
 
@@ -179,9 +185,18 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         finish()
     }
 
+    /**
+     * Companion object to provide a factory method for creating the activity's intent.
+     */
     companion object {
         const val ARG_ID = "arg_id"
 
+        /**
+         * Creates a new intent to start this activity.
+         * @param context The context of the calling activity.
+         * @param itemId The ID of the item to be displayed.
+         * @return An intent to start this activity.
+         */
         fun newIntent(context: Context, itemId: String): Intent {
             return Intent(context, ItemDetailActivity::class.java).apply {
                 putExtra(ARG_ID, itemId)
