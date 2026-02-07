@@ -55,6 +55,9 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
+        binding.deleteCTA.setOnClickListener {
+            deleteItem()
+        }
     }
 
     private fun loadItem() {
@@ -111,6 +114,34 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
             )
         }
+    }
+
+    private fun deleteItem() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = safeApiCall { RetrofitClient.apiService.deleteItem(item.id) }
+
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is Result.Success -> handleSuccessDelete()
+                    is Result.Error -> {
+                        Toast.makeText(
+                            this@ItemDetailActivity,
+                            "Erro ao deletar o item",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleSuccessDelete() {
+        Toast.makeText(
+            this,
+            "Item deletado com sucesso",
+            Toast.LENGTH_LONG
+        ).show()
+        finish()
     }
 
     companion object {
