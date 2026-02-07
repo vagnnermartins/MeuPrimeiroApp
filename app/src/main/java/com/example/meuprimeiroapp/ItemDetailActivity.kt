@@ -3,6 +3,7 @@ package com.example.meuprimeiroapp
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.meuprimeiroapp.databinding.ActivityItemDetailBinding
@@ -11,30 +12,40 @@ import com.example.meuprimeiroapp.service.Result
 import com.example.meuprimeiroapp.service.RetrofitClient
 import com.example.meuprimeiroapp.service.safeApiCall
 import com.example.meuprimeiroapp.ui.loadUrl
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * An activity representing a single Item detail screen.
- */
-class ItemDetailActivity : AppCompatActivity() {
+class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityItemDetailBinding
 
     private lateinit var item: Item
 
-    /**
-     * Called when the activity is first created.
-     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle). Note: Otherwise it is null.
-     */
+    private lateinit var mMap: GoogleMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityItemDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
         loadItem()
+        setupGoogleMap()
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+        if (::item.isInitialized) {
+            // Se o item já estiver carregado, carregue-o no mapa
+            loadItemInGoogleMap()
+        }
     }
 
     /**
@@ -46,6 +57,12 @@ class ItemDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
         binding.toolbar.setNavigationOnClickListener {
             finish()
+        }
+        binding.deleteCTA.setOnClickListener {
+            deleteItem()
+        }
+        binding.editCTA.setOnClickListener {
+            editItem()
         }
     }
 
@@ -67,7 +84,7 @@ class ItemDetailActivity : AppCompatActivity() {
                     is Result.Error -> {
                         Toast.makeText(
                             this@ItemDetailActivity,
-                            "Erro ao buscar o getItem(itemId)",
+                            R.string.error_fetch_item,
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -76,14 +93,96 @@ class ItemDetailActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Handles the successful retrieval of item data, updating the UI.
-     */
+    private fun setupGoogleMap() {
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
     private fun handleSuccess() {
         binding.name.text = item.value.fullName
         binding.age.text = getString(R.string.item_age, item.value.age)
         binding.profession.setText(item.value.profession)
         binding.image.loadUrl(item.value.imageUrl)
+        loadItemInGoogleMap()
+    }
+
+    private fun loadItemInGoogleMap() {
+        if (!::mMap.isInitialized) return
+        item.value.location?.let {
+            binding.googleMapContent.visibility = View.VISIBLE
+            val location = LatLng(it.latitude, it.longitude)
+            mMap.addMarker(
+                MarkerOptions()
+                    .position(location)
+                    .title(it.name)
+            )
+            mMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    location,
+                    15f
+                )
+            )
+        }
+    }
+
+    private fun deleteItem() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = safeApiCall { RetrofitClient.apiService.deleteItem(item.id) }
+
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is Result.Success -> handleSuccessDelete()
+                    is Result.Error -> {
+                        Toast.makeText(
+                            this@ItemDetailActivity,
+                            R.string.error_delete,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun editItem() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = safeApiCall {
+                RetrofitClient.apiService.updateItem(
+                    item.id,
+                    item.value.copy(profession = binding.profession.text.toString())
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is Result.Success -> {
+                        Toast.makeText(
+                            this@ItemDetailActivity,
+                            R.string.success_update,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        finish()
+                    }
+
+                    is Result.Error -> {
+                        Toast.makeText(
+                            this@ItemDetailActivity,
+                            R.string.error_update,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleSuccessDelete() {
+        Toast.makeText(
+            this,
+            R.string.success_delete,
+            Toast.LENGTH_LONG
+        ).show()
+        finish()
     }
 
     /**
