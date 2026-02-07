@@ -8,4 +8,7 @@
     <string name="success_delete">Item deletado com sucesso</string>
     <string name="generical_error">Erro desconhecido, clique para tentar novamente.</string>
     <string name="no_items">Nenhum item disponível.</string>
+    <string name="required_field">Campo obrigatório</string>
+    <string name="error_add_item">Erro ao adicionar o item.</string>
+    <string name="success_add_item">Item adicionado com sucesso.</string>
 </resources>
