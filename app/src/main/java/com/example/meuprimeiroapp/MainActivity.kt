@@ -25,6 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * The main activity of the application.
+ * This activity displays a list of items and handles location permissions.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -33,6 +37,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<String>
 
+    /**
+     * Called when the activity is first created.
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle). Note: Otherwise it is null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -41,11 +49,17 @@ class MainActivity : AppCompatActivity() {
         requestLocationPermission()
     }
 
+    /**
+     * Called when the activity will start interacting with the user.
+     */
     override fun onResume() {
         super.onResume()
         fetchItems()
     }
 
+    /**
+     * Sets up the views and their listeners.
+     */
     private fun setupView() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             fetchItems()
@@ -56,11 +70,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Requests location permission from the user.
+     */
     private fun requestLocationPermission() {
-        // Inicializa o FusedLocationPermission
+        // Initializes the FusedLocationPermission
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Configura o ActivityResultLauncher para solicitar a permissão de localização
+        // Sets up the ActivityResultLauncher for requesting location permission
         locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 getLastLocation()
@@ -72,6 +89,9 @@ class MainActivity : AppCompatActivity() {
         checkLocationPermissionAndRequest()
     }
 
+    /**
+     * Checks for location permission and requests it if necessary.
+     */
     private fun checkLocationPermissionAndRequest() {
         when {
             ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED &&
@@ -90,6 +110,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Gets the last known location of the device.
+     */
     private fun getLastLocation() {
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED) {
@@ -109,6 +132,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Fetches items from the API.
+     */
     private fun fetchItems() {
         CoroutineScope(Dispatchers.IO).launch {
             val result = safeApiCall { RetrofitClient.apiService.getItems() }
@@ -125,6 +151,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Handles the successful response from the API.
+     * @param items The list of items to be displayed.
+     */
     private fun handleOnSuccess(items: List<Item>) {
         binding.recyclerView.adapter = ItemAdapter(items) { item ->
             val intent = ItemDetailActivity.newIntent(this, item.id)
