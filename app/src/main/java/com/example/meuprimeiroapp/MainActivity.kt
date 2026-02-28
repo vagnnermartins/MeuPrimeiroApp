@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.meuprimeiroapp.adapter.ItemAdapter
+import com.example.meuprimeiroapp.database.DatabaseBuilder
+import com.example.meuprimeiroapp.database.model.UserLocation
 import com.example.meuprimeiroapp.databinding.ActivityMainBinding
 import com.example.meuprimeiroapp.model.Item
 import com.example.meuprimeiroapp.service.Result
@@ -110,7 +112,15 @@ class MainActivity : AppCompatActivity() {
                 val location = task.result
                 val latitude = location.latitude
                 val longitude = location.longitude
-                Toast.makeText(this, "Latitude: $latitude, Longitude: $longitude", Toast.LENGTH_SHORT).show()
+                CoroutineScope(Dispatchers.IO).launch {
+                    val userLocation = UserLocation(
+                        latitude = latitude,
+                        longitude = longitude
+                    )
+                    DatabaseBuilder.getInstance()
+                        .userLocationDao()
+                        .insert(userLocation)
+                }
             } else {
                 Toast.makeText(this, "Não foi possível obter a localização", Toast.LENGTH_SHORT).show()
             }
