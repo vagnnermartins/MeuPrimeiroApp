@@ -2,6 +2,8 @@ package com.example.meuprimeiroapp
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.location.Location
 import android.os.Bundle
@@ -160,5 +162,12 @@ class MainActivity : AppCompatActivity() {
         binding.message.visibility = View.VISIBLE
         binding.message.setText(R.string.generical_error)
         binding.recyclerView.visibility = View.GONE
+    }
+
+    companion object {
+
+        fun newIntent(context: Context) =
+            Intent(context, MainActivity::class.java)
+
     }
 }
